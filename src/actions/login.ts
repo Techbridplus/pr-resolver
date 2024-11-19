@@ -22,7 +22,7 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
         if(e instanceof AuthError){
             switch(e.type){
                 case "CredentialsSignin": return {error: "Invalid credentials"};
-                default: return {error: "something went wrong"};
+                default: return {success: "something went wrong"};
             }
         }
         throw e;

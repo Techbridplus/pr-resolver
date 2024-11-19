@@ -9,6 +9,7 @@ import { getUserByEmail } from "@/data/user";
 export const signup = async (values: z.infer<typeof SignUpSchema>) => {
     await dbConnect();
     const validatedFields=SignUpSchema.safeParse(values);
+    
     if(!validatedFields.success){
         return {error: "Invalid fields"};
     }
@@ -21,12 +22,18 @@ export const signup = async (values: z.infer<typeof SignUpSchema>) => {
         return {error: "User already exists"};
     }
     const newUser=await UserModel.create({
-        data:{
+        
             email,
             password:hashedPassword,
             name
-        }
+
+        
     });
+    if(!newUser){
+        console.error("User not created");
+        return {error: "User not created"};
+    }
+    console.log("nwe user",newUser);    
 
     // TODO : send verification email
     return {success: "User created"};

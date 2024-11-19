@@ -4,7 +4,9 @@ import mongoose, { Document, Model, Schema } from 'mongoose';
 interface User extends Document {
   name: string | undefined;
   email: string | undefined;
+  emailVerified: boolean;
   password: string | undefined;
+  role: 'admin' | 'user';
   username: string | undefined;
   avatar: string | undefined;
   githubId: string | undefined;
@@ -14,6 +16,7 @@ interface User extends Document {
 
 // Define the User schema
 const UserSchema: Schema<User> = new Schema({
+
   name: {
     type: String,
     required: true,
@@ -25,24 +28,34 @@ const UserSchema: Schema<User> = new Schema({
     unique: true,
     match: [/.+\@.+\..+/, 'Please use a valid email address'],
   },
+  emailVerified: {
+    type: Boolean,
+    default: false,
+  },
   username: {
     type: String,
-    unique: true,
-    trim: true,
   },
   password: {
     type: String,
     required: true,
+    default: null,
+  },
+  role: {
+    type: String,
+    enum: ['admin', 'user'],
+    default: 'user',
   },
   avatar: {
     type: String,
+    default:null,
   },
   githubId: {
     type: String,
-    unique: true,
+    default: null,
   },
   accessToken: {
     type: String,
+    default: null,
   },
 }, {
   timestamps: true,
