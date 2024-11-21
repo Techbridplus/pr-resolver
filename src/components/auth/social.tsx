@@ -7,9 +7,11 @@ import {signIn } from "next-auth/react";
 export const Social = () => {
     const handleClick = async (provider: "google"|"github") => {
         try {
-            await signIn(provider, { callbackUrl: '/settings' });
+            const result = await signIn(provider, { callbackUrl: '/settings' });
+            console.log("result ",result);
           } catch (error) {
-            console.error("Error during sign-in:", error);
+            console.log("social error ");
+            // console.error("Error during sign-in:", error);
           }
     }
 
