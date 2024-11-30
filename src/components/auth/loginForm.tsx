@@ -19,6 +19,7 @@ import { LoginSchema } from '../../schemas';
 import { z } from 'zod';
 import { login } from '@/actions/login';
 
+
 const LoginForm  = () => {
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
@@ -100,7 +101,7 @@ const LoginForm  = () => {
                 
               </FormField>
             </div>
-            <FormError  message={error}/>
+            <FormError  message={error }/>
             <FormSuccess message={success}/>
             <Button
               type="submit"

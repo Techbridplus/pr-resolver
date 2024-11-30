@@ -3,16 +3,17 @@ import  {FcGoogle} from 'react-icons/fc'
 import { FaGithub } from 'react-icons/fa'
 
 import { Button } from '@/components/ui/button'
-import {signIn } from "next-auth/react";
+import {signIn } from "@/auth";
 export const Social = () => {
     const handleClick = async (provider: "google"|"github") => {
-        try {
-            const result = await signIn(provider, { callbackUrl: '/settings' });
-            console.log("result ",result);
-          } catch (error) {
-            console.log("social error ");
-            // console.error("Error during sign-in:", error);
-          }
+        try{
+            const x = await signIn(provider,{ callbackUrl: '/settings', });
+            console.log("xxbbbx = ",x);
+        }catch(err){
+            console.log("In social.tsx",err);
+        }
+            
+      
     }
 
     return (

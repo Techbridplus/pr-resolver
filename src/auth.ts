@@ -1,5 +1,4 @@
-import NextAuth, { DefaultSession, User } from "next-auth"
-import { MongoDBAdapter } from "@next-auth/mongodb-adapter"
+import NextAuth, { User } from "next-auth"
 import client from "@/lib/mongodb"
 import GitHub from "next-auth/providers/github"
 import Google from "next-auth/providers/google"
@@ -8,6 +7,8 @@ import Credentials from "next-auth/providers/credentials"
 import { getUserByEmail, getUserById,updateUserAccount } from "./data/user"
 import UserModel from "./model/User"
 import bcrypt from 'bcryptjs';
+import { error } from "console"
+import { redirect } from "next/navigation"
 // import { updateUserAccount } from "./data/user";
 declare module "next-auth" {
   interface User {
@@ -18,7 +19,6 @@ declare module "next-auth" {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: MongoDBAdapter(client),
   session: {
     strategy: "jwt",
   },
@@ -57,56 +57,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
-  events: {
-    async linkAccount({ user, account, profile }) {
-      console.log("event is happening .. ");  
-      const existingUser = await getUserByEmail(profile.email || "");
-      if (existingUser && existingUser._id !== user._id) {
-        console.log("Email is already exist .. ")
-        throw new Error("This email is already associated with another account");
-      } else {
-        if (account.id) {
-          // Ensure username is not null
-          const username = profile.username || `user_${user._id}`;
-          if (user._id) {
-            await updateUserAccount(user._id, {
-                email: profile.email,
-                username: username,
-            });
-          } else {
-            throw new Error("User ID is undefined");
+  callbacks: {
+    async signIn({ account, profile, user })  {
+      try{
+        if(user.email){
+          const existingUser = await getUserByEmail(user.email);
+          console.log("Existing User",existingUser);  
+          if(existingUser){
+              return false;
           }
         }
+        return true;
+      } catch (error) {
+        console.log("Error in signIn callback",error);
+        throw error;
       }
-    },
-  },
-
-  callbacks: {
-    async signIn({ account, profile, user }) {
-      const email = profile?.email;
-
-      // Check if a user with the same email already exists
-      if (!email) {
-        throw new Error("Email is undefined");
-      }
-      const existingUser = await getUserByEmail(email);
-      console.log("account already exist...")
-
-      if(existingUser && account) {
-        if (existingUser.githubId && account.provider === "github") {
-          throw new Error("This account is already associated with another user");
-        }
-        if (existingUser.accessToken && account.provider === "google") {
-          throw new Error("This account is already associated with another user");
-        }
-        return  false;
-      }
-
-      // Allow sign-in for new users
-      return true;
     },
     async jwt({ token, user }) {
-      console.log('jwt token : ', token,' user : ', user);
       if (user) {
         token.sub = user._id;
       }
@@ -118,7 +85,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async session({ session, token }) {
 
-      console.log('session token : ', token);
       if (token.sub && session.user) {
         session.user.id = token.sub;
        
