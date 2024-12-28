@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useTransition } from 'react';
+import React, { useState, useTransition ,useEffect} from 'react';
 import { CardWrapper } from './card-wrapper';
 import  {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
@@ -18,12 +18,22 @@ import {
 import { LoginSchema } from '../../schemas';
 import { z } from 'zod';
 import { login } from '@/actions/login';
-
-
+import { useSearchParams } from 'next/navigation'
+import LoadingCard from '../loader';
+import { set } from 'mongoose';
 const LoginForm  = () => {
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
   const [isPending,startTransition]=useTransition();
+  const searchParams = useSearchParams();
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const errorMessage = searchParams.get('error');
+    if (errorMessage) {
+      setError(errorMessage);
+    }
+    setLoading(false);
+  }, [searchParams]);
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
@@ -42,8 +52,9 @@ const LoginForm  = () => {
     });
   }
   
-  return (
+  return  loading?(<LoadingCard/>):(
     <div className='h-full'>
+     
       <CardWrapper
         headerLabel="Login" 
         backButtonLabel="Don't have an account? Sign up" 

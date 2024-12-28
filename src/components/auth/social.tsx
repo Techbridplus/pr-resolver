@@ -3,14 +3,25 @@ import  {FcGoogle} from 'react-icons/fc'
 import { FaGithub } from 'react-icons/fa'
 
 import { Button } from '@/components/ui/button'
-import {signIn } from "@/auth";
-export const Social = () => {
+import { SocialLogin } from '@/actions/socialLogin';
+import { useRouter } from 'next/navigation'
+import { useState } from 'react';
+type SocialLoginResult = {
+    error?: string;
+    url?: string;
+};
+type SocialProps = {
+    onError: (message: string) => void;
+};
+export const Social = ({ onError }: SocialProps) => {
+    const router = useRouter();
     const handleClick = async (provider: "google"|"github") => {
         try{
-            const x = await signIn(provider,{ callbackUrl: '/settings', });
-            console.log("xxbbbx = ",x);
+            const result: SocialLoginResult = await SocialLogin(provider);
+            
         }catch(err){
             console.log("In social.tsx",err);
+            onError("Unexpected error during sign-in. Please try again.");
         }
             
       

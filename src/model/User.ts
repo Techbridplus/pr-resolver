@@ -9,8 +9,9 @@ interface User extends Document {
   role: 'admin' | 'user';
   username: string | undefined;
   avatar: string | undefined;
+  token: string | undefined;
   githubId: string | undefined;
-  accessToken: string| undefined;
+  accessToken: string | undefined;
   createdAt: Date;
 }
 
@@ -48,6 +49,10 @@ const UserSchema: Schema<User> = new Schema({
   avatar: {
     type: String,
     default:null,
+  },
+  token: {
+    type: String,
+    default: null,
   },
   githubId: {
     type: String,

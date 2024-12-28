@@ -5,6 +5,7 @@ import { SignUpSchema } from "@/schemas";
 import UserModel from "@/model/User";
 import dbConnect from "@/lib/dbConnect";
 import { getUserByEmail } from "@/data/user";
+import { redirect } from "next/navigation";
 
 export const signup = async (values: z.infer<typeof SignUpSchema>) => {
     await dbConnect();
@@ -21,6 +22,7 @@ export const signup = async (values: z.infer<typeof SignUpSchema>) => {
     if(existingUser){
         return {error: "User already exists"};
     }
+
     const newUser=await UserModel.create({
         
             email,

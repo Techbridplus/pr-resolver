@@ -7,8 +7,9 @@ import Credentials from "next-auth/providers/credentials"
 import { getUserByEmail, getUserById,updateUserAccount } from "./data/user"
 import UserModel from "./model/User"
 import bcrypt from 'bcryptjs';
-import { error } from "console"
-import { redirect } from "next/navigation"
+import { MongoDBAdapter } from "@auth/mongodb-adapter"
+
+
 // import { updateUserAccount } from "./data/user";
 declare module "next-auth" {
   interface User {
@@ -19,8 +20,10 @@ declare module "next-auth" {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  adapter: MongoDBAdapter(client),
   session: {
     strategy: "jwt",
+    maxAge:  20,
   },
   // secret: process.env.AUTH_SECRET_1,
   pages: {
@@ -58,13 +61,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async signIn({ account, profile, user })  {
+    async signIn({ account, profile, user }) {
       try{
         if(user.email){
-          const existingUser = await getUserByEmail(user.email);
-          console.log("Existing User",existingUser);  
-          if(existingUser){
-              return false;
+          const existingUser = await getUserByEmail(user.email); 
+          if (existingUser && account) {
+            if (existingUser.githubId && account.provider === "github") {
+              throw new Error("This GitHub account is already associated with another user");
+            }
+            if (existingUser.accessToken && account.provider === "google") {
+              throw new Error("This Google account is already associated with another user");
+            }
           }
         }
         return true;
